@@ -156,31 +156,46 @@ namespace UIAutomation.Pages
         #region Drag-and-Drop
 
         // Perform a drag-and-drop operation
-        public async Task DragAndDropAsync(string sourceSelector, string targetSelector)
-        {
-            _logger.Info($"Performing drag-and-drop from '{sourceSelector}' to '{targetSelector}'.");
-            var source = _page.Locator(sourceSelector);
-            var target = _page.Locator(targetSelector);
-
-            await source.HoverAsync();
-            await target.HoverAsync();
-            await source.DragToAsync(target);
-            _logger.Info($"Successfully performed drag-and-drop from '{sourceSelector}' to '{targetSelector}'.");
-        }
-
         public async Task DragAndDropInsideFrameAsync(string frameNameOrId, string sourceSelector, string targetSelector)
         {
-            // Step 1: Switch to the correct frame
-            var frame = await SwitchToFrameAsync(frameNameOrId);
+            try
+            {
+                var frame = await SwitchToFrameAsync(frameNameOrId);
 
-            // Step 2: Locate the source and target elements inside the frame
-            var source = frame.Locator(sourceSelector);
-            var target = frame.Locator(targetSelector);
+                var source = frame.Locator(sourceSelector);
+                var target = frame.Locator(targetSelector);
 
-            // Step 3: Perform the drag-and-drop operation
-            await source.HoverAsync();  // Hover on the source element first (recommended for drag actions)
-            await target.HoverAsync();  // Hover on the target element
-            await source.DragToAsync(target);  // Drag from source to target
+                // Retry logic for drag-and-drop
+                const int maxRetries = 3;
+                for (int attempt = 0; attempt < maxRetries; attempt++)
+                {
+                    try
+                    {
+                        await source.HoverAsync();
+                        await target.HoverAsync();
+                        await source.DragToAsync(target);
+
+                        // If drag-and-drop succeeds, break the retry loop
+                        break;
+                    }
+                    catch (PlaywrightException ex)
+                    {
+                        if (attempt == maxRetries - 1) // On last attempt, rethrow the exception
+                        {
+                            throw new InvalidOperationException("Drag and Drop failed after multiple attempts.", ex);
+                        }
+
+                        // Log retry and wait before retrying
+                        _logger.Warning($"Drag and Drop attempt {attempt + 1} failed: {ex.Message}. Retrying...");
+                        await Task.Delay(1000); // Delay before retrying
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Failed to perform drag and drop inside frame", ex);
+                throw;
+            }
         }
 
         #endregion

@@ -46,7 +46,7 @@ namespace UIAutomation.TestSuites
         public async Task DragAndDrop_InsideIframe_Works()
         {
             await _page.GotoAsync(Url);
-            _dragDropActions.DragAndDrop();
+            await _dragDropActions.DragAndDrop();
             Assert.That(_dragDropActions.IsPopUpExists(), Is.True);
         }
     }

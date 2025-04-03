@@ -20,9 +20,6 @@ namespace UIAutomation.Pages
         public async Task NavigateAsync() => await _page.GotoAsync("https://examples.sencha.com/extjs/7.8.0/examples/classic/dd/dragdropzones.html");
 
         // Check if the pop-up with the 'OK' button is displayed in the iframe
-        public bool IsPopUpDisplayed()
-        {
-            return IsLocatorFoundInsideFrameAsync("examples-iframe", "//a//span[text()='OK']").Result;
-        }
+        public bool IsPopUpDisplayed() => IsLocatorFoundInsideFrameAsync("examples-iframe", "//a//span[text()='OK']");
     }
 }

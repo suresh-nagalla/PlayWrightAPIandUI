@@ -19,7 +19,7 @@ namespace UIAutomation.Actions
         // Check if a popup exists
         public bool IsPopUpExists() => _dragDropPage.IsPopUpDisplayed();
 
-        public async void DragAndDrop()
+        public async Task DragAndDrop()
         {
             var frameId = "examples-iframe";
             var source = "div[data-recordid='1']";
